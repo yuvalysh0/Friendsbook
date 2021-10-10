@@ -49,7 +49,7 @@
     </q-page-container>
 
     <q-footer
-    class="small-screen-only">
+    class="small-screen-only fixed">
       <q-tabs
         v-model="tab"
         dense

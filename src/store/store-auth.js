@@ -48,7 +48,7 @@ const actions = {
       if (user) {
         commit('setLoggedIn', true)
         LocalStorage.set('loggedIn', true)
-        window.user = user
+        window.user = usder
         this.$router.push('/').catch(err => {
         })
       } else {
