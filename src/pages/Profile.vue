@@ -33,6 +33,7 @@
 
         <template v-if="!loadingPosts && postsById.length">
           <q-card
+            flat
             v-for="post in postsById"
             :key="post.id"
             class="card-post q-mb-md "
@@ -69,21 +70,12 @@
         </template>
       </div>
       <div class="col-4 large-screen-only">
-        <q-card class="q-mr-md">
-          <q-tabs
-            v-model="tab"
-            dense
-            class="bg-grey-3 text-grey-7"
-            active-color="primary"
-          >
-            <q-tab name="settings" label="Settings" />
-          </q-tabs>
-
-          <q-tab-panels v-model="tab" animated class="">
-            <q-tab-panel name="settings">
+        <q-card class="q-mr-md text-center">
+          <q-card-section class="bg-grey-3">
+            <div class="text-h6 text-primary">Settings</div>
+          </q-card-section>
+          <q-separator class="bg-primary"/>
               <Settings/>
-            </q-tab-panel>
-          </q-tab-panels>
         </q-card>
       </div>
     </div>
@@ -91,6 +83,7 @@
     <template>
       <q-dialog v-model="settingsDialog">
         <q-card>
+          <q-separator />
           <q-card-section class="row items-center q-pb-none">
             <div class="text-h6">Settings</div>
             <q-space />

@@ -8,7 +8,7 @@
             :key="post.id"
             class="card-post q-mb-md"
             flat
-            >
+          >
 
             <itemByUserId :userId="post.userId" :location="post.location" :user="user"/>
 
@@ -18,17 +18,19 @@
               :src="post.imageUrl"/>
 
             <q-card-section>
-              <div class="text-h6">{{ post.caption }}</div>
-              <div class="text-caption text-grey">{{ post.date | niceDate }}
+              <div class="text-h6">{{ post.caption }}
                 <q-btn
-                  @click="this.isLikeActive = !this.isLikeActive"
-                  class="q-ml-xs"
+                  @click="changeLike()"
+                  class="text-grey-7"
                   flat
                   round
-                  unelevated
-                  color="red-8"
-                  dense
                   icon="favorite"/>
+              </div>
+              <div class="text-caption text-grey">
+                {{ post.date | niceDate }}
+              </div>
+              <div class="text-grey">
+                <span class="text-subtitle1">3 likes</span>
               </div>
             </q-card-section>
           </q-card>
@@ -49,12 +51,12 @@
                 <q-item-label>
                   <q-skeleton
                     type="text"
-                    animation="fade" />
+                    animation="fade"/>
                 </q-item-label>
                 <q-item-label caption>
                   <q-skeleton
                     type="text"
-                    animation="fade" />
+                    animation="fade"/>
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -62,18 +64,18 @@
             <q-skeleton
               height="200px"
               square
-              animation="fade" />
+              animation="fade"/>
 
             <q-card-section>
               <q-skeleton
                 type="text"
                 class="text-subtitle2"
-                animation="fade" />
+                animation="fade"/>
               <q-skeleton
                 type="text"
                 width="50%"
                 class="text-subtitle2"
-                animation="fade" />
+                animation="fade"/>
             </q-card-section>
           </q-card>
         </template>
@@ -90,23 +92,6 @@
             <q-item-label class="text-bold">{{ userInfo.firstName }} {{ userInfo.lastName }}</q-item-label>
           </q-item-section>
         </q-item>
-        <q-card flat class="my-card q-ma-md">
-          <q-video
-            src="https://www.youtube.com/embed/nD-Zu6aayS0"
-          />
-        </q-card>
-
-        <q-card flat class="my-card q-ma-md">
-          <q-video
-            src="https://www.youtube.com/embed/mr9nfTqfQeA"
-          />
-        </q-card>
-
-        <q-card flat class="my-card q-ma-md">
-          <q-video
-            src="https://www.youtube.com/embed/eFEjDCMNqYs"
-          />
-        </q-card>
 
       </div>
     </div>
@@ -128,8 +113,8 @@ export default {
   data() {
     return {
       loadingPosts: false,
+      isLiked: false,
       userInfo: [],
-      isLikeActive: true
     }
   },
   computed: {
@@ -139,6 +124,10 @@ export default {
   methods: {
     ...mapActions('posts', ['getPosts']),
     ...mapActions('users', ['getUserInfo']),
+    changeLike() {
+      this.isLiked = !this.isLiked
+      console.log(this.isLiked)
+    }
   },
 
   filters: {
@@ -167,9 +156,9 @@ export default {
 </script>
 
 <style>
-.card-post{
-  border-top: #ff006e solid 2px;
-  border-bottom: #ff006e solid 2px;
-  border-radius: 35px;
+.card-post {
+  border-top: #9D9D9D solid 1px;
+  border-bottom: #9D9D9D solid 1px;
+  border-radius: 5px;
 }
 </style>

@@ -21,7 +21,8 @@ import { mapActions, mapState } from "vuex";
 export default {
   data() {
     return {
-      userInfo: {}
+      userInfo: {},
+      like: true
     }
   },
   props: ['location', 'userId', 'user'],
@@ -30,7 +31,6 @@ export default {
   },
   created() {
 
-    console.log('user id: ',this.userId)
     this.getUserInfoForPosts(this.userId).then(res => {
       this.userInfo = res
     })

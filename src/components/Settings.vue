@@ -1,7 +1,7 @@
 <template>
   <div class="text-center justify-center">
 
-    <q-item-label class="text-subtitle1 text-bold">More</q-item-label>
+    <q-item-label class="text-subtitle1 text-bold q-ma-sm">More</q-item-label>
 
     <q-item
       tag="label"
