@@ -1,14 +1,5 @@
 import firebase from "firebase/compat";
 
-firebase.initializeApp({
-  apiKey: "AIzaSyCMy8DkMnj8iUsis3MhLzy9TwVHCwB--vo",
-  authDomain: "friends-book-94ac5.firebaseapp.com",
-  projectId: "friends-book-94ac5",
-  storageBucket: "friends-book-94ac5.appspot.com",
-  messagingSenderId: "435702556828",
-  appId: "1:435702556828:web:b0aec9fc32243158a32559"
-})
-
 export default {
   firebase,
   uploadProfilePictureToStorage,
