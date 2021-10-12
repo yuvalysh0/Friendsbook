@@ -3,36 +3,36 @@
     <div class="row q-col-gutter-lg constrain" style="justify-content: center;">
       <div class="camera-frame q-pa-md">
         <video
-            v-show="!imageCaptured"
-            class="full-width"
-            autoplay
-            playsinline
-            ref="video"
+          v-show="!imageCaptured"
+          class="full-width"
+          autoplay
+          playsinline
+          ref="video"
         />
         <canvas
-            v-show="imageCaptured"
-            ref="canvas"
-            class="full-width"
-            height="240"
+          v-show="imageCaptured"
+          ref="canvas"
+          class="full-width"
+          height="240"
         />
       </div>
       <div class="text-center q-pa-md" style="width: 600px">
         <q-btn
-            v-if="hasCameraSupport"
-            @click="captureImage()"
-            color="primary"
-            icon="photo_camera"
-            :disable="imageCaptured"
-            round
-            size="lg"
+          v-if="hasCameraSupport"
+          @click="captureImage()"
+          color="primary"
+          icon="photo_camera"
+          :disable="imageCaptured"
+          round
+          size="lg"
         />
         <q-file
-            v-else
-            v-model="imageUpload"
-            @input="captureImageFallback"
-            outlined
-            label="Choose an image"
-            accept="image/*"
+          v-else
+          v-model="imageUpload"
+          @input="captureImageFallback"
+          outlined
+          label="Choose an image"
+          accept="image/*"
         >
           <template v-slot:prepend>
             <q-icon name="attach_file"/>
@@ -40,39 +40,39 @@
         </q-file>
         <div class="row justify-center q-ma-md">
           <q-input
-              v-model="post.caption"
-              class="col col-sm-6"
-              label="Caption *"
-              dense
+            v-model="post.caption"
+            class="col col-sm-6"
+            label="Caption *"
+            dense
           />
         </div>
         <div class="row justify-center q-ma-md">
           <q-input
-              v-model="post.location"
-              class="col col-sm-6"
-              label="Location"
-              :loading="loadingState"
-              dense>
+            v-model="post.location"
+            class="col col-sm-6"
+            label="Location"
+            :loading="loadingState"
+            dense>
             <template v-slot:append>
               <q-btn
-                  @click="getLocation()"
-                  v-if="!loadingState && locationSupported"
-                  round
-                  dense
-                  icon="place"
-                  flat
+                @click="getLocation()"
+                v-if="!loadingState && locationSupported"
+                round
+                dense
+                icon="place"
+                flat
               />
             </template>
           </q-input>
         </div>
         <div class="row justify-center q-mt-lg">
           <q-btn
-              unelevated
-              rounded
-              color="primary"
-              @click="addPost(user.id)"
-              label="Post Image"
-              :disable="!imageCaptured || !post.caption"
+            unelevated
+            rounded
+            color="primary"
+            @click="addPost(user.id)"
+            label="Post Image"
+            :disable="!imageCaptured || !post.caption"
           />
         </div>
       </div>
@@ -83,6 +83,7 @@
 <script>
 import {uid} from 'quasar'
 import {mapState, mapActions} from 'vuex'
+import firebase from "firebase/compat";
 
 require('md-gum-polyfill')
 export default {
@@ -113,6 +114,7 @@ export default {
 
   methods: {
     ...mapActions('users', ['getUserInfo']),
+    ...mapActions('posts', ['addPhotoToRealTimeDb']),
     initCamera() {
       navigator.mediaDevices.getUserMedia({
         video: true
@@ -210,13 +212,14 @@ export default {
       formData.append('file', this.post.photo, this.post.id + '.png')
 
       this.$axios.post('http://localhost:3000/createPost', formData)
-          .then(response => {
-            console.log(response)
+        .then(response => {
+          console.log(response)
+          this.addPhotoToRealTimeDb(this.post.id).then(() => {
             this.$router.push('/')
             this.showNotify()
             this.$q.loading.hide()
-
-          }).catch(err => {
+          })
+        }).catch(err => {
         this.$q.dialog({
           title: 'Error',
           message: 'Could not create post!'

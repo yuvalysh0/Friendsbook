@@ -12,27 +12,71 @@
         {{ location }}
       </q-item-label>
     </q-item-section>
+    <q-space/>
+    <q-card-section class="text-subtitle2 text-grey-8">
+      {{ allLikes }} likes
+    </q-card-section>
+    <q-btn
+      @click="changeLike()"
+      :class="{'text-red' : this.isLiked, 'text-grey-8' : !this.isLiked}"
+      flat
+      round
+      icon="favorite"/>
   </q-item>
 </template>
 
 <script>
 import { mapActions, mapState } from "vuex";
+import firebase from '../../middleware/firebase'
 
 export default {
   data() {
     return {
       userInfo: {},
-      like: true
+      like: true,
+      allLikes: 0,
+      isLiked: true
     }
   },
-  props: ['location', 'userId', 'user'],
+  props: ['location', 'userId', 'user', 'postId'],
   methods: {
-    ...mapActions('users', ['getUserInfo', 'getUserInfoForPosts'])
+    ...mapActions('users', ['getUserInfoForPosts']),
+    ...mapActions('posts', ['getAllLikes', 'addLike', 'deleteLike', 'checkIfTheUserLikedThePost']),
+    changeLike()  {
+      this.isLiked = !this.isLiked;
+      let payload = {postId: this.postId, userId: this.userId}
+      if (this.isLiked) {
+        this.addLike(payload).then(() => {
+          this.getAllLikes(this.postId).then(res => {
+            this.allLikes = res
+          })
+        })
+      }
+      else {
+        this.deleteLike(payload).then(() => {
+          this.getAllLikes(this.postId).then(res => {
+            this.allLikes = res
+          })
+        })
+      }
+    },
   },
   created() {
-
     this.getUserInfoForPosts(this.userId).then(res => {
       this.userInfo = res
+    })
+
+    this.getAllLikes(this.postId).then(res => {
+      this.allLikes = res
+    })
+
+    let payload = {postId: this.postId, userId: this.userId}
+    this.checkIfTheUserLikedThePost(payload).then(res => {
+      this.isLiked = res
+    })
+
+    firebase.getRef(this.postId).on('child_changed', (snapshot) => {
+      let data = snapshot.val()
     })
   }
 }

@@ -5,6 +5,7 @@ import users from './users'
 import posts from './posts'
 import auth from './store-auth'
 import settings from './store-settings'
+import comments from './store-comments'
 
 
 Vue.use(Vuex)
@@ -15,6 +16,7 @@ export default new Vuex.Store({
     posts,
     users,
     auth,
-    settings
+    settings,
+    comments
   }
 })

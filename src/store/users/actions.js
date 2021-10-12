@@ -3,7 +3,6 @@ import {LocalStorage} from "quasar";
 
 export default {
   setNewUser: async ({commit}, id) => {
-
   },
 
   getUserInfoForPosts: ({}, id) => {

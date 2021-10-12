@@ -4,13 +4,13 @@
       <div class="col-11 col-sm-8">
         <template v-if="!loadingPosts && allPosts.length">
           <q-card
-            v-for="post of allPosts"
-            :key="post.id"
+            v-for="(post, index) of allPosts"
+            :key=index
             class="card-post q-mb-md"
             flat
           >
 
-            <itemByUserId :userId="post.userId" :location="post.location" :user="user"/>
+            <itemByUserId :userId="post.userId" :location="post.location" :user="user" :postId="post.id"/>
 
             <q-separator/>
 
@@ -19,21 +19,17 @@
 
             <q-card-section>
               <div class="text-h6">{{ post.caption }}
-                <q-btn
-                  @click="changeLike()"
-                  class="text-grey-7"
-                  flat
-                  round
-                  icon="favorite"/>
+
               </div>
               <div class="text-caption text-grey">
                 {{ post.date | niceDate }}
               </div>
-              <div class="text-grey">
-                <span class="text-subtitle1">3 likes</span>
-              </div>
+            </q-card-section>
+            <q-card-section>
+              <Comments :postId="post.id"/>
             </q-card-section>
           </q-card>
+
         </template>
 
         <template v-else-if="!loadingPosts && !allPosts.length">
@@ -44,42 +40,47 @@
           <q-card flat bordered>
             <q-item>
               <q-item-section avatar>
-                <q-skeleton size="40px" type="QAvatar" animation="fade"/>
+                <q-skeleton size="40px" type="QAvatar" animation="pulse"/>
               </q-item-section>
 
               <q-item-section>
                 <q-item-label>
                   <q-skeleton
                     type="text"
-                    animation="fade"/>
+                    animation="pulse"/>
                 </q-item-label>
                 <q-item-label caption>
                   <q-skeleton
                     type="text"
-                    animation="fade"/>
+                    animation="pulse"/>
                 </q-item-label>
               </q-item-section>
             </q-item>
 
             <q-skeleton
-              height="200px"
+              height="450px"
               square
-              animation="fade"/>
-
+              animation="pulse"/>
             <q-card-section>
               <q-skeleton
                 type="text"
                 class="text-subtitle2"
-                animation="fade"/>
+                animation="pulse"/>
               <q-skeleton
                 type="text"
                 width="50%"
                 class="text-subtitle2"
-                animation="fade"/>
+                animation="pulse"/>
+              <q-skeleton
+                type="text"
+                width="50%"
+                class="text-subtitle2"
+                animation="pulse"/>
             </q-card-section>
           </q-card>
         </template>
       </div>
+
       <div class="col-4 large-screen-only">
         <q-item>
           <q-item-section avatar>
@@ -87,7 +88,6 @@
               <q-img :src='userInfo.profilePic'/>
             </q-avatar>
           </q-item-section>
-
           <q-item-section>
             <q-item-label class="text-bold">{{ userInfo.firstName }} {{ userInfo.lastName }}</q-item-label>
           </q-item-section>
@@ -103,17 +103,17 @@ import {date} from 'quasar'
 import {mapState, mapActions} from 'vuex'
 import firebaseInstance from '../../middleware/firebase'
 import itemByUserId from "components/itemByUserId";
+import Comments from "components/Comments";
 import {LocalStorage} from "quasar";
 
 export default {
   name: 'Home',
   components: {
-    itemByUserId
+    itemByUserId, Comments
   },
   data() {
     return {
       loadingPosts: false,
-      isLiked: false,
       userInfo: [],
     }
   },
@@ -122,11 +122,11 @@ export default {
     ...mapState('users', ['users', 'user'])
   },
   methods: {
-    ...mapActions('posts', ['getPosts']),
+    ...mapActions('posts', ['getPosts', 'addLike', 'deleteLike']),
     ...mapActions('users', ['getUserInfo']),
-    changeLike() {
-      this.isLiked = !this.isLiked
-      console.log(this.isLiked)
+
+    addOrDeleteLike(postId) {
+      id(this.isLiked)
     }
   },
 
@@ -151,14 +151,14 @@ export default {
           this.loadingPosts = false
         })
       }).catch(err => console.log(err))
-  }
+  },
 }
 </script>
 
 <style>
 .card-post {
-  border-top: #9D9D9D solid 1px;
-  border-bottom: #9D9D9D solid 1px;
-  border-radius: 5px;
+  border: #EFEFEF solid 1px;
+  border: #EFEFEF solid 1px;
+  border-radius: 3px;
 }
 </style>

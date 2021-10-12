@@ -1,8 +1,12 @@
 import firebase from "firebase/compat";
+import auth from 'firebase/auth'
+import {uid} from "quasar";
+
 
 firebase.initializeApp({
   apiKey: "AIzaSyCMy8DkMnj8iUsis3MhLzy9TwVHCwB--vo",
   authDomain: "friends-book-94ac5.firebaseapp.com",
+  databaseURL: "https://friends-book-94ac5-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "friends-book-94ac5",
   storageBucket: "friends-book-94ac5.appspot.com",
   messagingSenderId: "435702556828",
@@ -10,7 +14,16 @@ firebase.initializeApp({
 })
 
 export default {
+  getRef,
+  getComments,
+  addComment,
+  addPhotoToDb,
   firebase,
+  getWhoLikedThePost,
+  addLike,
+  deleteLike,
+  addOrDeleteLike,
+  getAllLikes,
   uploadProfilePictureToStorage,
   getPosts,
   getPostsById,
@@ -25,6 +38,7 @@ export default {
 
 }
 
+let realtimeDatabase = firebase.database();
 let db = firebase.firestore();
 
 function uploadProfilePictureToStorage(file, userId, newUser) {
@@ -91,6 +105,48 @@ function getPosts() {
   });
 }
 
+async function addLike(postId, userId, likes) {
+  let arr = await realtimeDatabase.ref(`posts/${postId}`).get().then(snapshot => {
+    if (!snapshot.val().whoLikedit){
+      arr = []
+    }
+    else {
+      arr = snapshot.val().whoLikedit
+    }
+    arr.push(userId)
+    realtimeDatabase.ref(`posts/${postId}`).set({allLikes: likes, whoLikedit: arr}).then(() => {
+      console.log('arr add like: ', arr)
+    })
+  })
+}
+
+async function deleteLike(postId, userId, likes) {
+  let arr = await realtimeDatabase.ref(`posts/${postId}`).get().then(snapshot => {
+    arr = snapshot.val().whoLikedit
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === userId)
+        arr.splice(i, 1)
+    }
+    realtimeDatabase.ref(`posts/${postId}`).set({allLikes: likes, whoLikedit: arr}).then(() => {
+      console.log('arr delete like: ', arr)
+    })
+  })
+}
+
+async function addOrDeleteLike(postId, userId, func) {
+  let likes = await this.getAllLikes(postId)
+  let arr = []
+  if (func === 'add') {
+    addLike(postId, userId, ++likes).then(() => {
+      console.log('add like in addOrDeleteLike - index')
+    })
+  } else {
+    deleteLike(postId, userId, --likes).then(() => {
+      console.log('delete like in addOrDeleteLike - index')
+    })
+  }
+}
+
 function getPostsById(id) {
   let posts = []
   return db.collection('posts').orderBy('date', 'desc').get().then(snapshot => {
@@ -103,7 +159,63 @@ function getPostsById(id) {
   });
 }
 
-
-function setNewPost() {
+function getWhoLikedThePost(postId, userId) {
+  return realtimeDatabase.ref(`posts/${postId}`).once('value').then((snapshot) => {
+    let arr = snapshot.val().whoLikedit
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === userId) {
+        return true
+      }
+    }
+    return false
+    // ...
+  }).catch(err => {
+    console.log(err)
+  });
 }
 
+function getRef(postId){
+  return realtimeDatabase.ref(`posts/${postId}`)
+}
+
+async function getAllLikes(postId) {
+  return await realtimeDatabase.ref(`posts/${postId}`).once('value').then((snapshot) => {
+    return snapshot.val().allLikes
+    // ...
+  }).catch(err => {
+    console.log(err)
+  });
+}
+
+async function addPhotoToDb(postId) {
+  await realtimeDatabase.ref(`posts/${postId}`).set({
+    allLikes: 0,
+    whoLikedit: []
+  }).then(() => {
+    console.log('The post was added to real time db')
+  })
+}
+
+async function getComments(postId) {
+  return await realtimeDatabase.ref(`comments/${postId}`).once('value').then((snapshot) => {
+    return snapshot.val()
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+async function addComment(comment, postId, userId) {
+  await getUserInfo(userId).then(res => {
+    let user = res
+    realtimeDatabase.ref(`comments/${postId}/${uid()}`).set({
+      date: Date.now(),
+      text: comment,
+      userId: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        id: user.id,
+        profilePic: user.profilePic
+      }
+    })
+  })
+}

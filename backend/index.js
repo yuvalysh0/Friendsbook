@@ -95,7 +95,8 @@ app.post('/createPost', (request, response) => {
         response.send('Post Added: ' + fields.id)
       })
     }
-  });
+  })
+
   request.pipe(busboy);
 })
 
