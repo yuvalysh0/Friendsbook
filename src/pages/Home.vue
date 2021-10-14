@@ -1,164 +1,136 @@
 <template>
   <q-page>
-    <div class="row q-col-gutter-lg constrain">
-      <div class="col-11 col-sm-8">
-        <template v-if="!loadingPosts && allPosts.length">
-          <q-card
-            v-for="(post, index) of allPosts"
-            :key=index
-            class="card-post q-mb-md"
-            flat
-          >
+    <div class="row q-pa-sm constrain">
+      <div
+        class="col-12 col-sm-8"
+        v-for="(post,index) in posts"
+        :key="index">
+        <PostsCards
+          class="q-pa-md" :post="post"/>
 
-            <itemByUserId :userId="post.userId" :location="post.location" :user="user" :postId="post.id"/>
+      </div>
+      <InfiniteLoading class="absolute-bottom" spinner="waveDots" @infinite="infiniteHandler">
+        <span class="col-12 col-sm-8" slot="no-more"> There are no more posts :) </span>
+      </InfiniteLoading>
 
-            <q-separator/>
-
-            <q-img
-              :src="post.imageUrl"/>
-
-            <q-card-section>
-              <div class="text-h6">{{ post.caption }}
-
-              </div>
-              <div class="text-caption text-grey">
-                {{ post.date | niceDate }}
-              </div>
-            </q-card-section>
-            <q-card-section>
-              <Comments :postId="post.id"/>
-            </q-card-section>
-          </q-card>
-
-        </template>
-
-        <template v-else-if="!loadingPosts && !allPosts.length">
-          <h5 class="text-center text-grey">No posts yet.</h5>
-        </template>
-
-        <template v-else>
+      <div class="col-12 col-sm-8">
+        <template v-if="loading">
           <q-card flat bordered>
             <q-item>
               <q-item-section avatar>
-                <q-skeleton size="40px" type="QAvatar" animation="pulse"/>
+                <q-skeleton size="40px" type="QAvatar"/>
               </q-item-section>
 
               <q-item-section>
                 <q-item-label>
                   <q-skeleton
-                    type="text"
-                    animation="pulse"/>
+                    type="text"/>
                 </q-item-label>
                 <q-item-label caption>
                   <q-skeleton
-                    type="text"
-                    animation="pulse"/>
+                    type="text"/>
                 </q-item-label>
               </q-item-section>
             </q-item>
 
             <q-skeleton
               height="450px"
-              square
-              animation="pulse"/>
+              square/>
             <q-card-section>
               <q-skeleton
                 type="text"
-                class="text-subtitle2"
-                animation="pulse"/>
+                class="text-subtitle2"/>
               <q-skeleton
                 type="text"
                 width="50%"
-                class="text-subtitle2"
-                animation="pulse"/>
+                class="text-subtitle2"/>
               <q-skeleton
                 type="text"
                 width="50%"
-                class="text-subtitle2"
-                animation="pulse"/>
+                class="text-subtitle2"/>
+              <q-skeleton
+                type="text"
+                width="50%"
+                class="text-subtitle2"/>
+              <q-skeleton
+                type="text"
+                width="50%"
+                class="text-subtitle2"/>
+              <q-skeleton
+                type="text"
+                width="100%"
+                class="text-subtitle2"/>
             </q-card-section>
           </q-card>
         </template>
       </div>
 
-      <div class="col-4 large-screen-only">
-        <q-item>
-          <q-item-section avatar>
-            <q-avatar rounded size="60px">
-              <q-img :src='userInfo.profilePic'/>
-            </q-avatar>
-          </q-item-section>
-          <q-item-section>
-            <q-item-label class="text-bold">{{ userInfo.firstName }} {{ userInfo.lastName }}</q-item-label>
-          </q-item-section>
-        </q-item>
-
-      </div>
     </div>
+
   </q-page>
 </template>
 
 <script>
-import {date} from 'quasar'
+import InfiniteLoading from 'vue-infinite-loading'
 import {mapState, mapActions} from 'vuex'
-import firebaseInstance from '../../middleware/firebase'
-import itemByUserId from "components/itemByUserId";
-import Comments from "components/Comments";
+import PostsCards from "components/PostsCards";
+import firebase from 'firebase/compat'
+import 'firebase/firestore'
 import {LocalStorage} from "quasar";
 
 export default {
-  name: 'Home',
   components: {
-    itemByUserId, Comments
+    PostsCards, InfiniteLoading
   },
+
   data() {
     return {
-      loadingPosts: false,
-      userInfo: [],
+      posts: [],
+      lastDocSnapshot: null,
+      loading: true
     }
   },
+
   computed: {
     ...mapState('posts', ['allPosts']),
-    ...mapState('users', ['users', 'user'])
   },
   methods: {
-    ...mapActions('posts', ['getPosts', 'addLike', 'deleteLike']),
+    ...mapActions('posts', ['getPosts']),
     ...mapActions('users', ['getUserInfo']),
 
-    addOrDeleteLike(postId) {
-      id(this.isLiked)
-    }
+    async fetchPosts() {
+      const db = firebase.firestore()
+      let postsRef = await db.collection('posts').limit(3).orderBy('date', 'desc')
+
+      if (this.lastDocSnapshot) {
+        postsRef = postsRef.startAfter(this.lastDocSnapshot)
+      }
+
+      const postsSnap = await postsRef.get()
+      this.lastDocSnapshot = postsSnap.docs[postsSnap.docs.length - 1]
+      const result = postsSnap.docs.map(doc => doc.data())
+      this.posts.push(...result)
+      this.loading = false;
+      return result.length
+    },
+
+    async infiniteHandler($state) {
+      const newPicturesCount = await this.fetchPosts()
+      if (newPicturesCount > 0) {
+        return $state.loaded() // More pictures to come
+      }
+      return $state.complete() // Done with the pictures
+    },
   },
 
-  filters: {
-    niceDate(value) {
-      return date.formatDate(value, 'MMM D h:mmA')
-    }
-  },
+  mounted() {
+    this.fetchPosts()
+    this.getUserInfo(window.user.uid)
+  }
 
-  created() {
-    this.userInfo = LocalStorage.getItem('user')
-    this.loadingPosts = true
-    this.getUserInfo(this.$q.localStorage.getItem('userId'))
-      .then(() => {
-        this.getPosts().then(() => {
-          this.loadingPosts = false
-        }).catch(() => {
-          this.$q.dialog({
-            title: 'Error',
-            message: 'Could not download posts'
-          })
-          this.loadingPosts = false
-        })
-      }).catch(err => console.log(err))
-  },
 }
 </script>
 
 <style>
-.card-post {
-  border: #EFEFEF solid 1px;
-  border: #EFEFEF solid 1px;
-  border-radius: 3px;
-}
+
 </style>

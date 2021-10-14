@@ -12,6 +12,7 @@
         {{ location }}
       </q-item-label>
     </q-item-section>
+
     <q-space/>
     <q-card-section class="text-subtitle2 text-grey-8">
       {{ allLikes }} likes
@@ -22,6 +23,14 @@
       flat
       round
       icon="favorite"/>
+    <q-btn
+      v-show="postOfUser(userInfo.id)"
+      @click="deletePost(postId)"
+      size="12px"
+      flat
+      color="dark"
+      icon="delete"
+      round/>
   </q-item>
 </template>
 
@@ -41,7 +50,26 @@ export default {
   props: ['location', 'userId', 'user', 'postId'],
   methods: {
     ...mapActions('users', ['getUserInfoForPosts']),
-    ...mapActions('posts', ['getAllLikes', 'addLike', 'deleteLike', 'checkIfTheUserLikedThePost']),
+    ...mapActions('posts', ['getAllLikes', 'addLike', 'deleteLike', 'checkIfTheUserLikedThePost', 'deletePostByUser']),
+    postOfUser(userId) {
+      if (userId === window.user.uid) {
+        return true
+      }
+      return false
+    },
+
+    deletePost(postId) {
+      this.deletePostByUser(postId).then(() => {
+        location.reload();
+        this.$q.notify({
+          color: 'orange-4',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: 'The post was removed.'
+        })
+      })
+    },
+
     changeLike()  {
       this.isLiked = !this.isLiked;
       let payload = {postId: this.postId, userId: this.userId}

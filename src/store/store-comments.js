@@ -20,9 +20,11 @@ const actions = {
     await db.addComment(payload[0], payload[1], payload[2])
   },
 
-  /*deleteComment: {
-
-  },*/
+  deleteCommentAction: async ({}, payload) => {
+    await db.deleteComment(payload.postId, payload.comment).then(() => {
+      console.log('actions: the comment was deleted.')
+    }).catch(err => console.log(err))
+  },
 
   getAllComments: async ({}, postId) => {
     return await db.getComments(postId)

@@ -211,7 +211,7 @@ export default {
       formData.append('userId', userId)
       formData.append('file', this.post.photo, this.post.id + '.png')
 
-      this.$axios.post('http://localhost:3000/createPost', formData)
+      this.$axios.post('https://friendsbookbackend.herokuapp.com/createPost', formData)
         .then(response => {
           console.log(response)
           this.addPhotoToRealTimeDb(this.post.id).then(() => {

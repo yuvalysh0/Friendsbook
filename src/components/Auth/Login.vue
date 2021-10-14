@@ -50,6 +50,7 @@
 
 <script>
 import {mapActions, mapState} from "vuex";
+import {LocalStorage} from "quasar";
 
 export default {
   data() {

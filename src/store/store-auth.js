@@ -1,5 +1,6 @@
 import firebaseInstance from '../../middleware/firebase'
 import {LocalStorage} from 'quasar'
+import usersActions from '../store/users/actions'
 
 const state = {
   loggedIn: false
@@ -18,10 +19,11 @@ const actions = {
       .then(response => {
         window.user = response.user;
         firebaseInstance.uploadProfilePictureToStorage(payload.profilePic, response.user.uid, payload)
+        firebaseInstance.getUserInfo(window.user.uid)
         return response.user.uid
       }).catch(error => {
-      console.log('error', error)
-    })
+        console.log('error', error)
+      })
   },
 
   loginUser({}, payload) {

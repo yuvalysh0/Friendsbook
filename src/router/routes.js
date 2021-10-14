@@ -9,6 +9,7 @@ const routes = [
       { path: '/auth', component: () => import('pages/Auth.vue') },
       { path: '/profile', component: () => import('pages/Profile.vue') },
       { path: '/profile/help', component: () => import('pages/Help.vue') },
+      { path: '/infiniteScroll', component: () => import('pages/infiniteScroll.vue') },
     ]
   },
 

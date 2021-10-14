@@ -52,7 +52,6 @@
     class="small-screen-only fixed">
       <q-tabs
         v-model="tab"
-        dense
       >
         <q-route-tab
           icon="home"

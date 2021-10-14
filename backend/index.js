@@ -1,5 +1,5 @@
 //dependencies
-
+let cors = require('cors')
 const express = require('express')
 const admin = require('firebase-admin');
 let inspect = require('util').inspect;
@@ -12,6 +12,7 @@ let UUId = require('uuid-v4')
 //config - express
 
 const app = express()
+app.use(cors())
 
 //config - firebase
 

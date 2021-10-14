@@ -5,6 +5,8 @@ export default {
   setNewUser: async ({commit}, id) => {
   },
 
+
+
   getUserInfoForPosts: ({}, id) => {
     let user = []
     return db.getUserInfo(id).then((user) => {
@@ -13,7 +15,7 @@ export default {
   },
 
   getUserInfo: async ({commit}, id) => {
-    let user = []
+    let user = {}
     user = await db.getUserInfo(id)
     LocalStorage.set('user', user)
     LocalStorage.set('userId', id)

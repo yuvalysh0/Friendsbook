@@ -1,5 +1,5 @@
 <template>
-  <div >
+  <div>
     <p class="text-subtitle1 text-primary" v-if="this.comments">Comments: </p>
     <p class="text-subtitle2 text-grey-8 text-center" v-else>There are no comments! </p>
     <q-card
@@ -12,17 +12,38 @@
             <img :src="localComment.userId.profilePic">
           </q-avatar>
         </q-item-section>
-
         <q-item-section>
-          <q-item-label class="text-grey-8">{{ localComment.userId.firstName }} {{ localComment.userId.lastName }}</q-item-label>
+          <q-item-label class="text-grey-8">{{ localComment.userId.firstName }} {{localComment.userId.lastName }}
+          </q-item-label>
           <q-item-section>{{ localComment.text }}</q-item-section>
         </q-item-section>
-        <q-item-section side>{{ localComment.date | niceDate }}</q-item-section>
+        <q-item-section side>
+          {{ localComment.date | niceDate }}
+          <q-btn
+            v-show="commentOfUser(localComment.userId)"
+            @click="deleteComment(postId, localComment)"
+            size="12px"
+            icon="delete"
+            rounded
+            flat
+            color="red-4"/>
+        </q-item-section>
       </q-item>
     </q-card>
-    <q-input v-model="commentInput" label="Enter a comment" filled class="q-mt-md">
+    <q-input
+      v-model="commentInput"
+      label="Enter a comment"
+      filled class="q-mt-md"
+    >
       <template v-slot:after>
-        <q-btn @click="addComment(postId)" round dense flat icon="send" color="primary"/>
+        <q-btn
+          @click="addComment(postId)"
+          :disable="!commentInput"
+          round
+          dense
+          flat
+          icon="send"
+          color="primary"/>
       </template>
     </q-input>
 
@@ -47,20 +68,44 @@ export default {
 
   computed: {
     ...mapState('comments', ['comment']),
-    ...mapState('users', ['user'] )
+    ...mapState('users', ['user'])
   },
 
   props: ['postId'],
 
   methods: {
-    ...mapActions('comments', ['getAllComments', 'addNewComment']),
+    commentOfUser(userId) {
+      if (userId.id === window.user.uid) {
+        return true
+      }
+      return false
+    },
+    ...mapActions('comments', ['getAllComments', 'addNewComment', 'deleteCommentAction']),
     ...mapActions('users', ['getUserInfoForPosts']),
     async addComment(postId) {
       let userId = LocalStorage.getItem('user').id
       await this.addNewComment([this.commentInput, this.postId, userId]).then(() => {
         this.getAllComments(this.postId).then(res => {
           this.comments = res
-          this.commentInput=''
+          this.commentInput = ''
+        }).catch((err) => {
+          console.log(err)
+        })
+      })
+    },
+
+    deleteComment(postId, comment) {
+      let payload = {postId, comment}
+      this.deleteCommentAction(payload).then(() => {
+        this.$q.notify({
+          color: 'orange-4',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: 'The comment was removed.'
+        })
+        this.getAllComments(this.postId).then(res => {
+          this.comments = res
+          this.commentInput = ''
         }).catch((err) => {
           console.log(err)
         })

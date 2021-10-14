@@ -17,6 +17,7 @@ export default {
   getRef,
   getComments,
   addComment,
+  deleteComment,
   addPhotoToDb,
   firebase,
   getWhoLikedThePost,
@@ -27,6 +28,7 @@ export default {
   uploadProfilePictureToStorage,
   getPosts,
   getPostsById,
+  deletePost,
   getUserInfo,
   getProfilePictureFromDb: (userId) => {
     db.collection('users').doc(userId).get().then(
@@ -89,7 +91,6 @@ function createNewUser(newUser, pictureLink, userId) {
 }
 
 function getUserInfo(id) {
-  let user = []
   return db.collection('users').doc(id).get().then(user => {
     return user.data();
   })
@@ -107,10 +108,9 @@ function getPosts() {
 
 async function addLike(postId, userId, likes) {
   let arr = await realtimeDatabase.ref(`posts/${postId}`).get().then(snapshot => {
-    if (!snapshot.val().whoLikedit){
+    if (!snapshot.val().whoLikedit) {
       arr = []
-    }
-    else {
+    } else {
       arr = snapshot.val().whoLikedit
     }
     arr.push(userId)
@@ -174,7 +174,15 @@ function getWhoLikedThePost(postId, userId) {
   });
 }
 
-function getRef(postId){
+async function deletePost(postId) {
+  await db.collection('posts').doc(`${postId}`).delete().then(() => {
+    console.log("post successfully deleted!");
+  }).catch((error) => {
+    console.error("Error removing document: ", error);
+  })
+}
+
+function getRef(postId) {
   return realtimeDatabase.ref(`posts/${postId}`)
 }
 
@@ -197,7 +205,7 @@ async function addPhotoToDb(postId) {
 }
 
 async function getComments(postId) {
-  return await realtimeDatabase.ref(`comments/${postId}`).once('value').then((snapshot) => {
+  return await realtimeDatabase.ref(`comments/${postId}`).orderByChild('date').once('value').then((snapshot) => {
     return snapshot.val()
   }).catch(err => {
     console.log(err)
@@ -205,10 +213,11 @@ async function getComments(postId) {
 }
 
 async function addComment(comment, postId, userId) {
+  let date = Date.now()
   await getUserInfo(userId).then(res => {
     let user = res
-    realtimeDatabase.ref(`comments/${postId}/${uid()}`).set({
-      date: Date.now(),
+    realtimeDatabase.ref(`comments/${postId}/${date}`).set({
+      date: date,
       text: comment,
       userId: {
         firstName: user.firstName,
@@ -217,5 +226,14 @@ async function addComment(comment, postId, userId) {
         profilePic: user.profilePic
       }
     })
+  })
+}
+
+async function deleteComment(postId, comment) {
+  await realtimeDatabase.ref(`comments/${postId}/${comment.date}`).remove().then(() => {
+    console.log('The comment was removed! :) ')
+    this.getComments()
+  }).catch(err => {
+    console.log(err)
   })
 }

@@ -4,12 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "deploy": "heroku builds:create -a friendsbookbackend"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "busboy": "^0.3.1",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "firebase-admin": "^9.12.0",
     "nodemon": "^2.0.13",

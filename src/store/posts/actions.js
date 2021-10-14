@@ -2,8 +2,8 @@ import db from '../../../middleware/firebase'
 
 export default {
 
-  getPost() {
-
+  deletePostByUser: async ({}, postId) => {
+    await db.deletePost(postId)
   },
 
   getPostsById: async ({commit}, id) => {
@@ -13,8 +13,7 @@ export default {
   },
 
   getPosts: async ({commit}) => {
-    let posts = []
-    posts = await db.getPosts()
+    const posts = await db.getPosts()
     commit('setPosts', posts)
   },
 
@@ -23,11 +22,11 @@ export default {
   },
 
   addLike: async ({}, payload) => {
-    return await db.addOrDeleteLike(payload.postId,payload.userId, 'add')
+    return await db.addOrDeleteLike(payload.postId, payload.userId, 'add')
   },
 
   deleteLike: async ({}, payload) => {
-    return await db.addOrDeleteLike(payload.postId,payload.userId, 'delete')
+    return await db.addOrDeleteLike(payload.postId, payload.userId, 'delete')
   },
 
   getAllLikes: async ({}, postId) => {
