@@ -41,6 +41,7 @@ yarn-error.log*
 */npm-debug.log
 lerna-debug.log
 *~
+serviceAccountKey.json
 service-account-credentials.json
 index.js
 **/package-lock.json
