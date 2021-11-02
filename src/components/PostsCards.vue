@@ -4,7 +4,6 @@
     class="card-post q-mb-md"
     flat
   >
-
     <itemByUserId :userId="post.userId" :location="post.location" :user="user" :postId="post.id"/>
 
     <q-separator/>
@@ -14,6 +13,15 @@
       :src="post.imageUrl"/>
 
     <q-card-section>
+      <div class="likeBtn">
+        <span class="text-subtitle2 text-grey-8 q-mr-xs">{{ allLikes }} likes</span>
+        <q-btn
+          @click="changeLike()"
+          :class="{'text-red' : this.isLiked, 'text-grey-8' : !this.isLiked}"
+          flat
+          round
+          icon="favorite"/>
+      </div>
       <div class="text-h6">{{ post.caption }}
 
       </div>
@@ -32,11 +40,16 @@ import {date, LocalStorage} from "quasar";
 import {mapActions, mapState} from "vuex";
 import itemByUserId from "components/itemByUserId";
 import Comments from "components/Comments";
+import firebase from "app/middleware/firebase";
 
 export default {
   data() {
     return {
       userInfo: [],
+      like: true,
+      allLikes: 0,
+      isLiked: true,
+      postId: this.post.id
     }
   },
   components: {
@@ -50,17 +63,46 @@ export default {
   },
 
   methods: {
-    ...mapActions('posts', ['getPosts', 'addLike', 'deleteLike']),
+    ...mapActions('posts', ['getPosts', 'addLike', 'deleteLike', 'checkIfTheUserLikedThePost', 'deletePostByUser', 'getAllLikes']),
     ...mapActions('users', ['getUserInfo']),
 
-    addOrDeleteLike(postId) {
-      id(this.isLiked)
+
+    changeLike() {
+      this.isLiked = !this.isLiked;
+      let payload = {postId: this.postId, userId: this.user.id}
+      if (this.isLiked) {
+        this.addLike(payload).then(() => {
+          this.getAllLikes(this.postId).then(res => {
+            this.allLikes = res
+          })
+        })
+      } else {
+        this.deleteLike(payload).then(() => {
+          this.getAllLikes(this.postId).then(res => {
+            this.allLikes = res
+          })
+        })
+      }
     },
   },
 
   created() {
     this.userInfo = LocalStorage.getItem('user')
     this.getUserInfo(this.$q.localStorage.getItem('userId'))
+
+    this.getAllLikes(this.postId).then(res => {
+      this.allLikes = res
+    })
+
+    let payload = {postId: this.postId, userId: this.userInfo.id}
+    this.checkIfTheUserLikedThePost(payload).then(res => {
+      this.isLiked = res
+    })
+
+    firebase.getRef(this.postId).on('child_changed', (snapshot) => {
+      let data = snapshot.val()
+    })
+
   },
 
   filters: {
@@ -75,5 +117,10 @@ export default {
 .card-post {
   border: #EFEFEF solid 1px;
   border-radius: 3px;
+}
+
+.likeBtn {
+  position: absolute;
+  right: 5px
 }
 </style>

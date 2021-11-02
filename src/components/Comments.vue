@@ -1,9 +1,9 @@
 <template>
   <div>
-    <p class="text-subtitle1 text-primary" v-if="this.comments">Comments: </p>
-    <p class="text-subtitle2 text-grey-8 text-center" v-else>There are no comments! </p>
+    <p class="text-subtitle2 text-grey-8 text-center" v-if="!this.comments">There are no comments! </p>
     <q-card
       v-for="localComment of comments"
+      :key="localComment.userId"
       flat
       class="my-card q-mb-md">
       <q-item>
@@ -13,21 +13,22 @@
           </q-avatar>
         </q-item-section>
         <q-item-section>
-          <q-item-label class="text-grey-8">{{ localComment.userId.firstName }} {{localComment.userId.lastName }}
+          <q-item-label class="text-grey-8">{{ localComment.userId.firstName }} {{ localComment.userId.lastName }}
           </q-item-label>
           <q-item-section>{{ localComment.text }}</q-item-section>
         </q-item-section>
-        <q-item-section side>
+        <q-item-section side class="q-mr-sm">
           {{ localComment.date | niceDate }}
-          <q-btn
-            v-show="commentOfUser(localComment.userId)"
-            @click="deleteComment(postId, localComment)"
-            size="12px"
-            icon="delete"
-            rounded
-            flat
-            color="red-4"/>
         </q-item-section>
+        <q-btn
+          v-show="commentOfUser(localComment.userId)"
+          @click="deleteComment(postId, localComment)"
+          class="absolute-right"
+          icon="delete"
+          round
+          size="10px"
+          flat
+          color="grey-8"/>
       </q-item>
     </q-card>
     <q-input
@@ -82,6 +83,7 @@ export default {
     },
     ...mapActions('comments', ['getAllComments', 'addNewComment', 'deleteCommentAction']),
     ...mapActions('users', ['getUserInfoForPosts']),
+
     async addComment(postId) {
       let userId = LocalStorage.getItem('user').id
       await this.addNewComment([this.commentInput, this.postId, userId]).then(() => {
@@ -95,6 +97,10 @@ export default {
     },
 
     deleteComment(postId, comment) {
+      if (!this.commentOfUser(comment.userId)) {
+        console.log('you cant delete this comment')
+        return
+      }
       let payload = {postId, comment}
       this.deleteCommentAction(payload).then(() => {
         this.$q.notify({
@@ -125,6 +131,7 @@ export default {
     }).catch((err) => {
       console.log(err)
     })
+
   }
 }
 

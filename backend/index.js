@@ -15,13 +15,14 @@ const app = express()
 app.use(cors())
 
 //config - firebase
+const serviceAccount = require("serviceAccountKey.json");
 
-const serviceAccount = require('./serviceAccountKey.json');
+
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'friends-book-94ac5.appspot.com'
-
+  storageBucket: 'friends-book-94ac5.appspot.com',
+  databaseURL: "https://friends-book-94ac5-default-rtdb.europe-west1.firebasedatabase.app"
 });
 
 const db = admin.firestore();

@@ -2,6 +2,29 @@ import firebase from "firebase/compat";
 import auth from 'firebase/auth'
 import {uid} from "quasar";
 
+const path = require('path')
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') })
+
+
+/* TODO
+* HARDCODE YOUR CREDENTIALS FOR KNOW,
+* BECAUSE I DONT WANT U TO WASTE ANY MORE TIME
+* LATER ON, FIGURE A WAY TO FIX THE .ENV SITUATION
+* I WILL HELP YOU TOO.
+* KEEP UP WITH THE GOOD WORK <3
+* P.S :
+* DONT EAT YOUR BF'S TUNA SANDWITCHES ..
+* */
+
+// firebase.initializeApp({
+//   apiKey: process.env.FB_API_KEY,
+//   authDomain: process.env.FB_AUTH_DOMAIN,
+//   databaseURL: process.env.FB_DATABASE_URL,
+//   projectId: process.env.FB_PROJECT_IDL,
+//   storageBucket: process.env.FB_STORAGE_BUCKET,
+//   messagingSenderId: process.env.FB_MESSAGING_SENDER_ID,
+//   appId: process.env.FB_APP_ID
+// })
 
 firebase.initializeApp({
   apiKey: "AIzaSyCMy8DkMnj8iUsis3MhLzy9TwVHCwB--vo",
@@ -12,7 +35,6 @@ firebase.initializeApp({
   messagingSenderId: "435702556828",
   appId: "1:435702556828:web:b0aec9fc32243158a32559"
 })
-
 export default {
   getRef,
   getComments,
@@ -29,6 +51,7 @@ export default {
   getPosts,
   getPostsById,
   deletePost,
+  deleteAllUserPosts,
   getUserInfo,
   getProfilePictureFromDb: (userId) => {
     db.collection('users').doc(userId).get().then(
@@ -48,11 +71,8 @@ function uploadProfilePictureToStorage(file, userId, newUser) {
   storageRef.put(file).then((snapshot) => {
     storageRef.getDownloadURL()
       .then((url) => {
-        // Insert url into an <img> tag to "download"
         createNewUser(newUser, url, userId)
       }).catch((error) => {
-      // A full list of error codes is available at
-      // https://firebase.google.com/docs/storage/web/handle-errors
       switch (error.code) {
         case 'storage/object-not-found':
           // File doesn't exist
@@ -63,9 +83,6 @@ function uploadProfilePictureToStorage(file, userId, newUser) {
         case 'storage/canceled':
           // User canceled the upload
           break;
-
-        // ...
-
         case 'storage/unknown':
           // Unknown error occurred, inspect the server response
           break;
@@ -148,6 +165,7 @@ async function addOrDeleteLike(postId, userId, func) {
 }
 
 function getPostsById(id) {
+
   let posts = []
   return db.collection('posts').orderBy('date', 'desc').get().then(snapshot => {
     snapshot.forEach((doc) => {
@@ -175,11 +193,29 @@ function getWhoLikedThePost(postId, userId) {
 }
 
 async function deletePost(postId) {
+  await realtimeDatabase.ref(`posts/${postId}`).remove().then(() => {
+    console.log('post deleted from realTimeDB')
+  })
+  await realtimeDatabase.ref(`comments/${postId}`).remove().then(() => {
+    console.log('comments were removed from realTimeDB')
+  })
   await db.collection('posts').doc(`${postId}`).delete().then(() => {
     console.log("post successfully deleted!");
   }).catch((error) => {
     console.error("Error removing document: ", error);
   })
+}
+
+async function deleteAllUserPosts(userId) {
+  await db.collection('posts').get().then(snapshot => {
+    snapshot.forEach((doc) => {
+      if (doc.data().userId === userId) {
+        this.deletePost(doc.data().id).then(() => {
+          console.log('the post was deleted. ')
+        })
+      }
+    })
+  });
 }
 
 function getRef(postId) {

@@ -1,5 +1,12 @@
 <template>
   <div class="text-center justify-center">
+    <q-btn
+      @click="confirm"
+      class="q-ma-md"
+      icon="delete"
+      label="Delete all posts!"
+      rounded
+      color="red-8" />
 
     <q-item-label class="text-subtitle1 text-bold q-ma-sm">More</q-item-label>
 
@@ -44,15 +51,38 @@
 
 <script>
 import {openURL} from 'quasar'
+import {mapActions} from "vuex";
 
 export default {
+  props: ['userId'],
   methods: {
+    ...mapActions('posts', ['deleteAllUserPosts']),
     visitOurWebsite() {
       openURL('https://www.google.com')
     },
     emailUs() {
       window.location.href = 'mailto: yuvalysh0@gmail.com?subject=friendsbook feedback'
-    }
+    },
+
+    confirm () {
+      this.$q.dialog({
+        title: 'Delete all posts',
+        message: 'Are you sure you want to delete all of your posts? ',
+        cancel: true,
+        persistent: true
+      }).onOk(() => {
+        this.deleteAllUserPosts(this.userId).then(() => {
+          this.$q.notify({
+            color: 'red-6',
+            textColor: 'white',
+            icon: 'cloud_done',
+            message: 'All of your posts were removed successfully.'
+          })
+        }).catch(err => console.log(err))
+      }).onCancel(() => {
+        console.log('>>>> Cancel')
+      })
+    },
   }
 }
 </script>

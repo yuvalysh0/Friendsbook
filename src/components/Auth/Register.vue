@@ -73,6 +73,7 @@
         flat
         color="primary"/>
       <q-btn
+        :disable="!formData.profilePic || !formData.firstName || !formData.lastName"
         label="Register"
         type="submit"
         color="primary"/>
@@ -82,6 +83,7 @@
 
 <script>
 import {mapActions} from "vuex";
+import defaultProfilePic from "src/assets/defaultProfilePic.png"
 
 export default {
   data() {
@@ -107,6 +109,9 @@ export default {
       this.$refs.email.validate()
       this.$refs.password.validate()
       if (!this.$refs.email.hasError && !this.$refs.password.hasError) {
+        if (!this.formData.profilePic) {
+          this.formData.profilePic = defaultProfilePic
+        }
         this.registerUser(this.formData)
           .then(userId => {
             this.getUserInfo(userId)

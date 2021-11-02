@@ -2,6 +2,12 @@ import db from '../../../middleware/firebase'
 
 export default {
 
+  deleteAllUserPosts: async ({}, userId ) => {
+    await db.deleteAllUserPosts(userId).then(() => {
+      console.log('All user posts were removed. ')
+    })
+  },
+
   deletePostByUser: async ({}, postId) => {
     await db.deletePost(postId)
   },

@@ -5,9 +5,7 @@
         class="col-12 col-sm-8"
         v-for="(post,index) in posts"
         :key="index">
-        <PostsCards
-          class="q-pa-md" :post="post"/>
-
+        <PostsCards :post="post"/>
       </div>
       <InfiniteLoading class="absolute-bottom" spinner="waveDots" @infinite="infiniteHandler">
         <span class="col-12 col-sm-8" slot="no-more"> There are no more posts :) </span>
@@ -101,11 +99,9 @@ export default {
     async fetchPosts() {
       const db = firebase.firestore()
       let postsRef = await db.collection('posts').limit(3).orderBy('date', 'desc')
-
       if (this.lastDocSnapshot) {
         postsRef = postsRef.startAfter(this.lastDocSnapshot)
       }
-
       const postsSnap = await postsRef.get()
       this.lastDocSnapshot = postsSnap.docs[postsSnap.docs.length - 1]
       const result = postsSnap.docs.map(doc => doc.data())
@@ -124,7 +120,7 @@ export default {
   },
 
   mounted() {
-    this.fetchPosts()
+    // this.fetchPosts()
     this.getUserInfo(window.user.uid)
   }
 

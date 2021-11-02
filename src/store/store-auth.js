@@ -19,7 +19,6 @@ const actions = {
       .then(response => {
         window.user = response.user;
         firebaseInstance.uploadProfilePictureToStorage(payload.profilePic, response.user.uid, payload)
-        firebaseInstance.getUserInfo(window.user.uid)
         return response.user.uid
       }).catch(error => {
         console.log('error', error)
