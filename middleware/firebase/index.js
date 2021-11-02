@@ -6,25 +6,15 @@ const path = require('path')
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') })
 
 
-/* TODO
-* HARDCODE YOUR CREDENTIALS FOR KNOW,
-* BECAUSE I DONT WANT U TO WASTE ANY MORE TIME
-* LATER ON, FIGURE A WAY TO FIX THE .ENV SITUATION
-* I WILL HELP YOU TOO.
-* KEEP UP WITH THE GOOD WORK <3
-* P.S :
-* DONT EAT YOUR BF'S TUNA SANDWITCHES ..
-* */
-
-// firebase.initializeApp({
-//   apiKey: process.env.FB_API_KEY,
-//   authDomain: process.env.FB_AUTH_DOMAIN,
-//   databaseURL: process.env.FB_DATABASE_URL,
-//   projectId: process.env.FB_PROJECT_IDL,
-//   storageBucket: process.env.FB_STORAGE_BUCKET,
-//   messagingSenderId: process.env.FB_MESSAGING_SENDER_ID,
-//   appId: process.env.FB_APP_ID
-// })
+/*firebase.initializeApp({
+  apiKey: process.env.FB_API_KEY,
+  authDomain: process.env.FB_AUTH_DOMAIN,
+  databaseURL: process.env.FB_DATABASE_URL,
+  projectId: process.env.FB_PROJECT_IDL,
+  storageBucket: process.env.FB_STORAGE_BUCKET,
+  messagingSenderId: process.env.FB_MESSAGING_SENDER_ID,
+  appId: process.env.FB_APP_ID
+})*/
 
 firebase.initializeApp({
   apiKey: "AIzaSyCMy8DkMnj8iUsis3MhLzy9TwVHCwB--vo",
@@ -35,6 +25,7 @@ firebase.initializeApp({
   messagingSenderId: "435702556828",
   appId: "1:435702556828:web:b0aec9fc32243158a32559"
 })
+
 export default {
   getRef,
   getComments,
